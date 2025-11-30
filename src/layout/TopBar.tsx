@@ -31,7 +31,7 @@ export default function Topbar() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" fontWeight={700}>
-            Admin
+            Collector.Shop Backoffice
           </Typography>
         </Box>
 

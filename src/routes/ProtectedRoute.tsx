@@ -7,9 +7,8 @@ export default function ProtectedRoute({
   children: JSX.Element;
 }) {
   const token = localStorage.getItem("TOKEN");
-  console.log("ProtectedRoute token:", token);
   if (!token) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   return children;

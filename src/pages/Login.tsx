@@ -17,7 +17,7 @@ export default function Login() {
       setError("");
       const data = await loginAdmin(email, password);
       localStorage.setItem("TOKEN", data.access_token);
-      navigate("/admin");
+      navigate("/adminDashboard");
     } catch {
       setError("Email ou mot de passe incorrect");
     }

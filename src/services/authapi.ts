@@ -8,9 +8,13 @@ export async function loginAdmin(email: string, password: string) {
     body: JSON.stringify({ email, password }),
   });
 
-  if (!res.ok) throw new Error("Identifiants incorrects");
+  const data = await res.json().catch(() => ({}));
 
-  return res.json();
+  if (!res.ok) {
+    throw new Error(data.message || "Identifiants incorrects");
+  }
+
+  return data;
 }
 
 export async function logout() {

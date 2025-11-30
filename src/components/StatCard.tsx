@@ -14,7 +14,10 @@ export default function StatCard({ icon, value, label }: Props) {
       sx={{
         p: 3,
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
         gap: 2,
         borderRadius: 3,
         boxShadow: "0px 4px 16px rgba(15,23,42,0.05)",
@@ -22,25 +25,24 @@ export default function StatCard({ icon, value, label }: Props) {
     >
       <Box
         sx={{
-          width: 52,
-          height: 52,
+          width: 120,
+          height: 120,
           borderRadius: "50%",
           bgcolor: "#f9731611",
           display: "flex",
-          alignItems: "center",
           justifyContent: "center",
+          alignItems: "center",
           color: "#f97316",
-          fontSize: 28,
+          fontSize: 48,
         }}
       >
         {icon}
       </Box>
-      <Box>
-        <Typography fontSize={22} fontWeight={700}>
-          {value}
-        </Typography>
-        <Typography color="text.secondary">{label}</Typography>
-      </Box>
+
+      <Typography fontSize={34} fontWeight={700}>
+        {value}
+      </Typography>
+      <Typography color="text.secondary">{label}</Typography>
     </Paper>
   );
 }
