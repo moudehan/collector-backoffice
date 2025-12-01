@@ -5,7 +5,6 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import MapIcon from "@mui/icons-material/Map";
 import SettingsIcon from "@mui/icons-material/Settings";
 import TableChartIcon from "@mui/icons-material/TableChart";
-import WidgetsIcon from "@mui/icons-material/Widgets";
 import {
   Avatar,
   Box,
@@ -16,12 +15,13 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { logout } from "../services/authapi";
 
 const menuItems = [
-  { icon: <DashboardIcon />, label: "Dashboard" },
-  { icon: <WidgetsIcon />, label: "Widgets" },
-  { icon: <TableChartIcon />, label: "Tables" },
+  { icon: <DashboardIcon />, label: "Dashboard", route: "/adminDashboard" },
+  { icon: <AppsIcon />, label: "Catégories", route: "/categories" },
+  { icon: <TableChartIcon />, label: "Articles", route: "/articles" },
   { icon: <AppsIcon />, label: "Apps" },
   { icon: <MapIcon />, label: "Map" },
   { icon: <ContactMailIcon />, label: "Contact" },
@@ -33,6 +33,7 @@ export default function Sidebar() {
   const handleLogout = async () => {
     await logout();
   };
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -70,15 +71,10 @@ export default function Sidebar() {
           <ListItemButton
             key={item.label}
             onClick={() =>
-              item.label === "Deconnexion" ? handleLogout() : null
+              item.label === "Deconnexion"
+                ? handleLogout()
+                : navigate(item.route || "")
             }
-            sx={{
-              color: "#e5e7eb",
-              "&.Mui-selected, &:hover": {
-                bgcolor: "rgba(59,130,246,0.15)",
-              },
-            }}
-            selected={item.label === "Dashboard"}
           >
             <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
               {item.icon}
