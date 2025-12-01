@@ -37,6 +37,7 @@ export default function DataTable<T>({ title, data, columns }: Props<T>) {
           borderBottom: "2px solid #f3f4f6",
           pb: 1,
           fontSize: 13,
+          textAlign: "left",
         }}
       >
         {columns.map((col) => (

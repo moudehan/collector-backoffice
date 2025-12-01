@@ -1,5 +1,5 @@
-import { Button } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Button } from "@mui/material";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -18,7 +18,6 @@ export default function AnimatedButton({
   label,
   onClick,
   color = "#1e4fff",
-  width = 130,
   height = 45,
   variant = "contained",
   showArrow = true,
@@ -34,13 +33,13 @@ export default function AnimatedButton({
         variant === "text" && showArrow ? <ChevronRightIcon /> : undefined
       }
       sx={{
-        width,
+        width: "auto",
         height,
+        whiteSpace: "nowrap",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         gap: 0.4,
-        whiteSpace: "nowrap",
         borderRadius: "50px",
         fontWeight: 600,
         fontSize: 16,
