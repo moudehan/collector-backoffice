@@ -22,7 +22,7 @@ const menuItems = [
   { icon: <DashboardIcon />, label: "Dashboard", route: "/adminDashboard" },
   { icon: <AppsIcon />, label: "Catégories", route: "/categories" },
   { icon: <TableChartIcon />, label: "Articles", route: "/articles" },
-  { icon: <AppsIcon />, label: "Apps" },
+  { icon: <AppsIcon />, label: "Fraudes", route: "/alertfraude" },
   { icon: <MapIcon />, label: "Map" },
   { icon: <ContactMailIcon />, label: "Contact" },
   { icon: <SettingsIcon />, label: "Settings" },

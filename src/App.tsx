@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ArticlesPage from "./pages/ArticlesPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import DashboardPage from "./pages/DashboardPage";
+import FraudAlertsPage from "./pages/FraudAlertPage";
 import Login from "./pages/Login";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
@@ -32,6 +33,15 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ArticlesPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/alertfraude"
+          element={
+            <ProtectedRoute>
+              <FraudAlertsPage />
             </ProtectedRoute>
           }
         />
