@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../layout/DashboardLayout";
 import { getFraudAlerts } from "../services/fraud.api";
 
+import { useFraudAlerts } from "../services/socket";
 import type { FraudAlert } from "../types/fraud.type";
 
 export default function FraudAlertsPage() {
@@ -15,14 +16,18 @@ export default function FraudAlertsPage() {
     })();
   }, []);
 
+  useFraudAlerts((newAlert: FraudAlert) => {
+    setAlerts((prev) => [newAlert, ...prev]);
+  });
+
   const getSeverityColor = (sev: string) => {
-    switch (sev) {
+    switch (sev.toLowerCase()) {
       case "high":
-        return { color: "error", label: "🚨 Forte anomalie" };
+        return { color: "error", label: "Forte anomalie" };
       case "medium":
-        return { color: "warning", label: "⚠️ Anomalie moyenne" };
+        return { color: "warning", label: "Anomalie moyenne" };
       default:
-        return { color: "info", label: "ℹ️ Légère anomalie" };
+        return { color: "info", label: "Légère anomalie" };
     }
   };
 
@@ -30,7 +35,7 @@ export default function FraudAlertsPage() {
     <DashboardLayout>
       <Box p={2}>
         <Typography variant="h4" fontWeight={700} mb={3}>
-          🔔 Alertes de Fraude
+          Alertes de Fraude
         </Typography>
 
         <Stack spacing={2}>
@@ -69,19 +74,19 @@ export default function FraudAlertsPage() {
                   </Typography>
 
                   <Typography fontSize={14}>
-                    💰 Prix médian : <b>{alert.average_price}€</b>
+                    Prix médian : <b>{alert.average_price}€</b>
                   </Typography>
 
                   <Typography fontSize={14}>
-                    🔺 Dernier prix : <b>{alert.last_price_recorded}€</b>
+                    Dernier prix : <b>{alert.last_price_recorded}€</b>
                   </Typography>
 
                   <Typography fontSize={14} mb={1}>
-                    📊 Écart : <b>{alert.diff_percent}%</b>
+                    Écart : <b>{alert.diff_percent}%</b>
                   </Typography>
 
                   <Typography fontSize={12} color="gray">
-                    ⏱ {new Date(alert.created_at).toLocaleString()}
+                    {new Date(alert.created_at).toLocaleString()}
                   </Typography>
                 </CardContent>
               </Card>

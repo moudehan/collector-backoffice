@@ -12,41 +12,62 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { showAlertPopup } from "../components/AlertPopop";
+import type { Item as NotifItem } from "../components/DropDownList";
 import DropdownList from "../components/DropDownList";
-import { getFraudAlerts } from "../services/fraud.api";
+
+import {
+  getFraudAlerts,
+  markAllNotificationsAsRead,
+  markAllNotificationsAsUnread,
+  markNotificationAsRead,
+} from "../services/fraud.api";
 import { useFraudAlerts } from "../services/socket";
-import type { Article } from "../types/articles.type";
+import type { FraudAlert } from "../types/fraud.type";
 
 export default function Topbar() {
   const navigate = useNavigate();
   const [anchorNotif, setAnchorNotif] = useState<null | HTMLElement>(null);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [notifications, setNotifications] = useState<NotifItem[]>([]);
 
-  const [notifications, setNotifications] = useState<
-    { id: string; title: string; subtitle: string }[]
-  >([]);
   useEffect(() => {
     (async () => {
-      const data = await getFraudAlerts();
+      const data: FraudAlert[] = await getFraudAlerts();
+
       setNotifications(
-        data.map((a: Article) => ({
-          id: a.id,
-          title: `${a.title}`,
-          subtitle: a.title,
+        data.map((alert) => ({
+          id: alert.id.toString(),
+          title: `${alert.article.title}`,
+          subtitle: `${alert.reason} (${alert.diff_percent}%)`,
+          is_read: alert.is_read,
+          article_id: alert.article.id,
         }))
       );
     })();
   }, []);
 
-  useFraudAlerts((alert) => {
+  useFraudAlerts((alert: FraudAlert) => {
     setNotifications((prev) => [
       {
-        id: alert.id,
-        title: `⚡ ${alert.title}`,
-        subtitle: alert.title,
+        id: alert.id.toString(),
+        title: `Nouvelle anomalie : ${alert.article.title}`,
+        subtitle: `${alert.reason} (${alert.diff_percent}%)`,
+        is_read: false,
+        article_id: alert.article.id,
       },
       ...prev,
     ]);
+
+    showAlertPopup({
+      type: "fraud",
+      title: alert.article.title,
+      message: `${alert.reason} (${alert.diff_percent}%)`,
+      severity: "warning",
+    });
   });
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   return (
     <AppBar
@@ -66,10 +87,12 @@ export default function Topbar() {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton
-            onClick={(e) => setAnchorNotif(e.currentTarget)}
+            onClick={(e) => {
+              setAnchorNotif(e.currentTarget);
+            }}
             sx={{ color: "white" }}
           >
-            <Badge badgeContent={notifications.length} color="error">
+            <Badge badgeContent={unreadCount} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
@@ -78,9 +101,32 @@ export default function Topbar() {
             anchorEl={anchorNotif}
             open={Boolean(anchorNotif)}
             onClose={() => setAnchorNotif(null)}
-            items={notifications}
+            items={notifications.slice(0, visibleCount)}
             emptyText="Aucune notification"
-            onItemClick={() => navigate("/fraud-alerts")}
+            onItemClick={async (item) => {
+              await markNotificationAsRead(item.id);
+              setNotifications((prev) =>
+                prev.map((n) =>
+                  n.id === item.id ? { ...n, is_read: true } : n
+                )
+              );
+              navigate("/alertfraude");
+            }}
+            onMarkAllRead={async () => {
+              await markAllNotificationsAsRead();
+              setNotifications((prev) =>
+                prev.map((n) => ({ ...n, is_read: true }))
+              );
+            }}
+            onMarkAllUnread={async () => {
+              await markAllNotificationsAsUnread();
+              setNotifications((prev) =>
+                prev.map((n) => ({ ...n, is_read: false }))
+              );
+            }}
+            onViewAll={() => navigate("/alertfraude")}
+            onLoadMore={() => setVisibleCount((prev) => prev + 10)}
+            hasMore={visibleCount < notifications.length}
           />
 
           <Avatar src="https://i.pravatar.cc/100?img=3" sx={{ ml: 1 }} />
