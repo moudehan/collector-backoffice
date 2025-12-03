@@ -11,20 +11,22 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
-import DataTable from "../components/DataTable";
-import DashboardLayout from "../layout/DashboardLayout";
+import DataTable from "../../components/DataTable";
+import DashboardLayout from "../../layout/DashboardLayout";
 
-import { approveArticle } from "../services/articles.api";
-import { getShops } from "../services/shops.api";
+import { approveArticle } from "../../services/articles.api";
+import { getShops } from "../../services/shops.api";
 
-import type { Article } from "../types/articles.type";
-import type { Shop } from "../types/shop.type";
+import { useNavigate } from "react-router-dom";
+import type { Article } from "../../types/articles.type";
+import type { Shop } from "../../types/shop.type";
 
 export default function ArticlesPage() {
   const [shops, setShops] = useState<Shop[]>([]);
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
 
+  const navigate = useNavigate();
   useEffect(() => {
     (async () => {
       const shopsData = await getShops();
@@ -48,7 +50,7 @@ export default function ArticlesPage() {
   return (
     <DashboardLayout>
       <Typography variant="h5" fontWeight={700} mb={2}>
-        🏪 Boutiques
+        Boutiques
       </Typography>
 
       <Stack direction="row" spacing={2} flexWrap="wrap">
@@ -101,8 +103,7 @@ export default function ArticlesPage() {
 
       <Box mt={4}>
         <Typography variant="h5" fontWeight={700} mb={2}>
-          📦 Articles du shop :{" "}
-          {selectedShop ? selectedShop.name : "Aucun shop sélectionné"}
+          Articles de la boutique : {selectedShop ? selectedShop.name : ""}
         </Typography>
 
         <DataTable<Article>
@@ -113,14 +114,12 @@ export default function ArticlesPage() {
             { field: "title", label: "Titre", width: "200px" },
             { field: "description", label: "Description", width: "280px" },
             { field: "price", label: "Prix (€)", width: "120px" },
-
             {
               field: "category" as keyof Article,
               label: "Catégorie",
               width: "150px",
               render: (_, row) => <span>{row.category?.name ?? "—"}</span>,
             },
-
             {
               field: "status",
               label: "Statut",
@@ -138,7 +137,6 @@ export default function ArticlesPage() {
                 />
               ),
             },
-
             {
               field: "" as keyof Article,
               label: "Actions",
@@ -156,6 +154,8 @@ export default function ArticlesPage() {
                 ),
             },
           ]}
+          rowClickable={true}
+          onRowClick={(row) => navigate(`/articles/${row.id}`)}
         />
       </Box>
     </DashboardLayout>

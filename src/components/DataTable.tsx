@@ -12,9 +12,17 @@ interface Props<T> {
   title: string;
   data: T[];
   columns: Column<T>[];
+  rowClickable?: boolean;
+  onRowClick?: (row: T) => void;
 }
 
-export default function DataTable<T>({ title, data, columns }: Props<T>) {
+export default function DataTable<T>({
+  title,
+  data,
+  columns,
+  rowClickable = false,
+  onRowClick,
+}: Props<T>) {
   return (
     <Box
       sx={{
@@ -48,12 +56,15 @@ export default function DataTable<T>({ title, data, columns }: Props<T>) {
       {data.map((row: T, i) => (
         <Box
           key={i}
+          onClick={() => rowClickable && onRowClick?.(row)}
           sx={{
             display: "grid",
             gridTemplateColumns: columns.map((c) => c.width ?? "1fr").join(" "),
             py: 2,
             borderBottom: "1px solid #f3f4f6",
             alignItems: "center",
+            cursor: rowClickable ? "pointer" : "default",
+            "&:hover": rowClickable ? { backgroundColor: "#f0f7ff" } : {},
           }}
         >
           {columns.map((col) => (
