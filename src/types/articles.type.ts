@@ -1,3 +1,6 @@
+import type { FraudAlert } from "./fraud.type";
+import type { Shop } from "./shop.type";
+
 export interface Category {
   id: string;
   name: string;
@@ -14,6 +17,10 @@ export interface Article {
   category: Category;
   created_at: string;
   updated_at: string;
+  fraud_alerts: FraudAlert[];
+  shop: Shop;
+  likesCount: number;
+  price_history: PriceHistoryItem[];
   seller: {
     id: string;
     firstname: string;
@@ -21,3 +28,10 @@ export interface Article {
     email: string;
   };
 }
+
+export type PriceHistoryItem = {
+  id: string;
+  old_price: number;
+  new_price: number;
+  changed_at: string;
+};

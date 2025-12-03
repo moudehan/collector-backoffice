@@ -10,6 +10,7 @@ export interface Shop {
     firstname: string;
     lastname: string;
     email: string;
+    created_at: string;
   };
 
   articles: Article[];

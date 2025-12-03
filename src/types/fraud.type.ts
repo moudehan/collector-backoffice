@@ -9,5 +9,6 @@ export interface FraudAlert {
   average_price: number;
   last_price_recorded: number;
   diff_percent: number;
+  is_read: boolean;
   created_at: string;
 }
