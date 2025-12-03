@@ -17,3 +17,30 @@ export async function approveArticle(id: string) {
 
   return res.json();
 }
+
+export async function getArticleById(id: string) {
+  const res = await fetch(`http://localhost:4000/articles/${id}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
+  });
+
+  if (!res.ok) throw new Error("Erreur lors de la récupération de l'article");
+
+  return res.json();
+}
+
+export async function deleteArticle(id: string) {
+  const res = await fetch(`http://localhost:4000/articles/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("TOKEN")}`,
+    },
+  });
+
+  if (!res.ok) {
+    const error = await res.text();
+    throw new Error(`Erreur lors de la suppression de l'article : ${error}`);
+  }
+
+  return res.json();
+}
