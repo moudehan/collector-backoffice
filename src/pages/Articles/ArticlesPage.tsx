@@ -6,7 +6,7 @@ import {
   CardContent,
   Chip,
   IconButton,
-  Stack,
+  Pagination,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -25,6 +25,8 @@ export default function ArticlesPage() {
   const [shops, setShops] = useState<Shop[]>([]);
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
+  const [page, setPage] = useState(1);
+  const shopsPerPage = 18;
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -47,14 +49,18 @@ export default function ArticlesPage() {
     );
   };
 
+  const startIndex = (page - 1) * shopsPerPage;
+  const paginatedShops = shops.slice(startIndex, startIndex + shopsPerPage);
+  const totalPages = Math.ceil(shops.length / shopsPerPage);
+
   return (
     <DashboardLayout>
       <Typography variant="h5" fontWeight={700} mb={2}>
         Boutiques
       </Typography>
 
-      <Stack direction="row" spacing={2} flexWrap="wrap">
-        {shops.map((shop) => {
+      <Box display="grid" gridTemplateColumns="repeat(6, 1fr)" gap={2}>
+        {paginatedShops.map((shop) => {
           const isSelected = selectedShop?.id === shop.id;
 
           return (
@@ -62,10 +68,13 @@ export default function ArticlesPage() {
               key={shop.id}
               onClick={() => handleSelectShop(shop)}
               sx={{
-                width: 280,
+                height: 190,
                 cursor: "pointer",
                 borderRadius: "14px",
                 padding: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
                 boxShadow: isSelected
                   ? "0px 4px 18px rgba(25, 118, 210, 0.4)"
                   : "0px 2px 10px rgba(0,0,0,0.1)",
@@ -99,7 +108,19 @@ export default function ArticlesPage() {
             </Card>
           );
         })}
-      </Stack>
+      </Box>
+
+      {totalPages > 1 && (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <Pagination
+            count={totalPages}
+            page={page}
+            onChange={(_, value) => setPage(value)}
+            color="primary"
+            size="large"
+          />
+        </Box>
+      )}
 
       <Box mt={4}>
         <Typography variant="h5" fontWeight={700} mb={2}>
@@ -110,20 +131,18 @@ export default function ArticlesPage() {
           title="Liste des articles"
           data={articles}
           columns={[
-            { field: "id", label: "ID", width: "400px" },
-            { field: "title", label: "Titre", width: "200px" },
-            { field: "description", label: "Description", width: "280px" },
-            { field: "price", label: "Prix (€)", width: "120px" },
+            { field: "id", label: "ID" },
+            { field: "title", label: "Titre" },
+            { field: "description", label: "Description" },
+            { field: "price", label: "Prix (€)" },
             {
               field: "category" as keyof Article,
               label: "Catégorie",
-              width: "150px",
               render: (_, row) => <span>{row.category?.name ?? "—"}</span>,
             },
             {
               field: "status",
               label: "Statut",
-              width: "150px",
               render: (_, row) => (
                 <Chip
                   label={row.status}
@@ -140,7 +159,6 @@ export default function ArticlesPage() {
             {
               field: "" as keyof Article,
               label: "Actions",
-              width: "120px",
               render: (_, row) =>
                 row.status === "pending" ? (
                   <IconButton
