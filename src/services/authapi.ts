@@ -1,3 +1,5 @@
+import { API_URL } from "./user.api";
+
 export async function loginAdmin(email: string, password: string) {
   const res = await fetch("http://localhost:4000/auth/login", {
     method: "POST",
@@ -17,14 +19,19 @@ export async function loginAdmin(email: string, password: string) {
   return data;
 }
 
-export async function logout() {
-  const token = localStorage.getItem("token");
+export async function logoutApi() {
+  const token = localStorage.getItem("TOKEN");
 
-  await fetch("http://localhost:4000/auth/logout", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  localStorage.removeItem("TOKEN");
-  window.location.href = "/login";
+  try {
+    if (token) {
+      await fetch(`${API_URL}/auth/logout`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+  } catch (err) {
+    console.error("Erreur logout API", err);
+  } finally {
+    localStorage.removeItem("TOKEN");
+  }
 }

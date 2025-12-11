@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
 import AnimatedButton from "../components/Button";
+import { useAuth } from "../contexte/UseAuth";
 import { loginAdmin } from "../services/authapi";
 
 export default function Login() {
@@ -10,6 +11,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const { refreshUser } = useAuth();
 
   async function handleLogin() {
     console.log("Handle login called");
@@ -17,6 +19,7 @@ export default function Login() {
       setError("");
       const data = await loginAdmin(email, password);
       localStorage.setItem("TOKEN", data.access_token);
+      await refreshUser();
       navigate("/adminDashboard");
     } catch {
       setError("Email ou mot de passe incorrect");
