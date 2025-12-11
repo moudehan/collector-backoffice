@@ -1,15 +1,17 @@
-import { Box, Button, Modal, Typography } from "@mui/material";
+import { Alert, Box, Button, Modal, Typography } from "@mui/material";
 
 interface Props {
   open: boolean;
   label: string;
+  error?: string | null;
   onClose: () => void;
-  onConfirm: () => Promise<void>;
+  onConfirm: () => void;
 }
 
 export default function ModalDeleteConfirm({
   open,
   label,
+  error,
   onClose,
   onConfirm,
 }: Props) {
@@ -26,10 +28,16 @@ export default function ModalDeleteConfirm({
         }}
       >
         <Typography variant="h6" mb={2}>
-          êtes-vous sûr de supprimer "{label}" ?
+          Êtes-vous sûr de supprimer "{label}" ?
         </Typography>
 
-        <Typography mb={3}>Cette action est irréversible.</Typography>
+        <Typography mb={2}>Cette action est irréversible.</Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         <Button variant="contained" color="error" fullWidth onClick={onConfirm}>
           Supprimer définitivement

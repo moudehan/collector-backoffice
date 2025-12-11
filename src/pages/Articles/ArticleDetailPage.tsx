@@ -33,6 +33,7 @@ export default function ArticleDetailPage() {
 
   const [article, setArticle] = useState<Article | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -66,9 +67,16 @@ export default function ArticleDetailPage() {
   const alertCount = article.fraud_alerts?.length ?? 0;
 
   const handleConfirmDelete = async () => {
-    await deleteArticle(article.id);
-    setOpenDeleteModal(false);
-    navigate("/articles");
+    try {
+      setDeleteError(null);
+      setOpenDeleteModal(false);
+      await deleteArticle(article.id);
+      navigate("/articles");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.log(err);
+      setDeleteError(err.message);
+    }
   };
 
   return (
@@ -268,7 +276,11 @@ export default function ArticleDetailPage() {
       <ModalDeleteConfirm
         open={openDeleteModal}
         label={article.title}
-        onClose={() => setOpenDeleteModal(false)}
+        error={deleteError}
+        onClose={() => {
+          setOpenDeleteModal(false);
+          setDeleteError(null);
+        }}
         onConfirm={handleConfirmDelete}
       />
     </DashboardLayout>

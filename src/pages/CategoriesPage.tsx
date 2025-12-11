@@ -21,7 +21,7 @@ import type { Category, CategoryInput } from "../types/categories.type";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
-
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -58,14 +58,13 @@ export default function CategoriesPage() {
         title="Liste des Catégories"
         data={categories}
         columns={[
-          { field: "id", label: "ID", width: "400px" },
-          { field: "name", label: "Nom", width: "250px" },
+          { field: "id", label: "ID" },
+          { field: "name", label: "Nom" },
           { field: "description", label: "Description" },
 
           {
             field: "" as keyof Category,
             label: "Actions",
-            width: "150px",
             render: (_, row) => (
               <Box display="flex" gap={1}>
                 <EditIcon
@@ -148,11 +147,23 @@ export default function CategoriesPage() {
         <ModalDeleteConfirm
           open={deleteOpen}
           label={selected.name}
-          onClose={() => setDeleteOpen(false)}
-          onConfirm={async () => {
+          error={deleteError}
+          onClose={() => {
             setDeleteOpen(false);
-            await deleteCategory(selected.id);
-            load();
+            setDeleteError(null);
+          }}
+          onConfirm={async () => {
+            try {
+              setDeleteError(null);
+              await deleteCategory(selected.id);
+              setDeleteOpen(false);
+              load();
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (err: any) {
+              console.log(err);
+
+              setDeleteError(err.message);
+            }
           }}
         />
       )}
