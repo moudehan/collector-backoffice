@@ -1,5 +1,9 @@
 import { Box, LinearProgress, Typography } from "@mui/material";
-import type { GridColDef } from "@mui/x-data-grid";
+import type {
+  GridColDef,
+  GridRowClassNameParams,
+  GridValidRowModel,
+} from "@mui/x-data-grid";
 import { DataGrid, GridOverlay } from "@mui/x-data-grid";
 import type { JSX } from "react";
 
@@ -17,6 +21,7 @@ interface Props<T> {
   rowClickable?: boolean;
   onRowClick?: (row: T) => void;
   loading?: boolean;
+  getRowStyle?: (row: T) => React.CSSProperties;
 }
 
 function CustomLoadingOverlay() {
@@ -29,13 +34,14 @@ function CustomLoadingOverlay() {
   );
 }
 
-export default function DataTable<T>({
+export default function DataTable<T extends GridValidRowModel>({
   title,
   data,
   columns,
   rowClickable = false,
   onRowClick,
   loading = false,
+  getRowStyle,
 }: Props<T>) {
   const sortedColumns = [
     ...columns.filter((c) => c.label.toLowerCase() === "actions"),
@@ -51,10 +57,14 @@ export default function DataTable<T>({
       sortable: true,
 
       flex: isActions ? 0 : 1,
-      width: isActions ? col.width ?? 130 : undefined,
+      width: isActions ? undefined : col.width,
+      minWidth: isActions ? 50 : 100,
 
       disableColumnMenu: true,
       resizable: false,
+
+      align: "center",
+      headerAlign: "center",
 
       renderCell: col.render
         ? (params) => (
@@ -62,8 +72,10 @@ export default function DataTable<T>({
               onClick={(e) => e.stopPropagation()}
               sx={{
                 width: "100%",
+                height: "100%",
                 display: "flex",
-                justifyContent: "flex-start",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               {col.render!(params.value, params.row)}
@@ -105,6 +117,30 @@ export default function DataTable<T>({
           disableColumnResize
           disableRowSelectionOnClick
           onRowClick={(params) => rowClickable && onRowClick?.(params.row as T)}
+          getRowClassName={(params: GridRowClassNameParams<T>) => {
+            if (!getRowStyle) return "";
+            const style = getRowStyle(params.row);
+            if (!style) return "";
+
+            const className = `row-style-${params.id}`;
+
+            const styleTag = document.createElement("style");
+            styleTag.innerHTML = `
+              .${className} {
+                ${Object.entries(style)
+                  .map(
+                    ([k, v]) =>
+                      `${k.replace(
+                        /[A-Z]/g,
+                        (m) => "-" + m.toLowerCase()
+                      )}:${v}`
+                  )
+                  .join(";")}
+              }
+            `;
+            document.head.appendChild(styleTag);
+            return className;
+          }}
           slotProps={{
             pagination: { labelRowsPerPage: "Lignes par page" },
           }}

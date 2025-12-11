@@ -8,6 +8,8 @@ import {
 } from "@mui/material";
 
 export type Item = {
+  user_id: string;
+  isUserAlert: boolean;
   id: string;
   title: string;
   subtitle?: string;
@@ -118,7 +120,7 @@ export default function DropdownList({
           <MenuItem
             onClick={() => {
               onItemClick?.(item);
-              window.location.href = `/articles/${item.article_id}`;
+              onClose();
             }}
             sx={{
               display: "flex",
