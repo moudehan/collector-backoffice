@@ -1,9 +1,7 @@
 import AppsIcon from "@mui/icons-material/Apps";
-import ContactMailIcon from "@mui/icons-material/ContactMail";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LogoutIcon from "@mui/icons-material/Logout";
-import MapIcon from "@mui/icons-material/Map";
-import SettingsIcon from "@mui/icons-material/Settings";
+import UserIcon from "@mui/icons-material/People";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import {
   Avatar,
@@ -16,24 +14,27 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../services/authapi";
+import { useAuth } from "../contexte/UseAuth";
 
 const menuItems = [
   { icon: <DashboardIcon />, label: "Dashboard", route: "/adminDashboard" },
+  { icon: <UserIcon />, label: "Utilisateurs", route: "/users" },
   { icon: <AppsIcon />, label: "Catégories", route: "/categories" },
   { icon: <TableChartIcon />, label: "Articles", route: "/articles" },
   { icon: <AppsIcon />, label: "Fraudes", route: "/alertfraude" },
-  { icon: <MapIcon />, label: "Map" },
-  { icon: <ContactMailIcon />, label: "Contact" },
-  { icon: <SettingsIcon />, label: "Settings" },
-  { icon: <LogoutIcon />, label: "Deconnexion" },
+  { icon: <LogoutIcon />, label: "Déconnexion" },
 ];
 
 export default function Sidebar() {
+  const { user, loading, logout } = useAuth();
+  const navigate = useNavigate();
+
+  if (loading) return null;
+  if (!user) return null;
+
   const handleLogout = async () => {
     await logout();
   };
-  const navigate = useNavigate();
 
   return (
     <Box
@@ -46,9 +47,11 @@ export default function Sidebar() {
       }}
     >
       <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
-        <Avatar src="https://i.pravatar.cc/100?img=3" />
+        <Avatar>{user.firstname?.[0]?.toUpperCase() ?? "?"}</Avatar>
         <Box>
-          <Typography fontWeight={600}>John David</Typography>
+          <Typography fontWeight={600}>
+            {user.firstname} {user.lastname}
+          </Typography>
           <Typography variant="body2" color="#10B981">
             ● En ligne
           </Typography>
@@ -70,11 +73,13 @@ export default function Sidebar() {
         {menuItems.map((item) => (
           <ListItemButton
             key={item.label}
-            onClick={() =>
-              item.label === "Deconnexion"
-                ? handleLogout()
-                : navigate(item.route || "")
-            }
+            onClick={() => {
+              if (item.label === "Déconnexion") {
+                handleLogout();
+              } else {
+                navigate(item.route || "");
+              }
+            }}
           >
             <ListItemIcon sx={{ color: "inherit", minWidth: 40 }}>
               {item.icon}

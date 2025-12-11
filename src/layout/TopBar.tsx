@@ -16,6 +16,7 @@ import { showAlertPopup } from "../components/AlertPopop";
 import type { Item as NotifItem } from "../components/DropDownList";
 import DropdownList from "../components/DropDownList";
 
+import { useAuth } from "../contexte/UseAuth";
 import {
   getFraudAlerts,
   markAllNotificationsAsRead,
@@ -30,6 +31,7 @@ export default function Topbar() {
   const [anchorNotif, setAnchorNotif] = useState<null | HTMLElement>(null);
   const [visibleCount, setVisibleCount] = useState(10);
   const [notifications, setNotifications] = useState<NotifItem[]>([]);
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     (async () => {
@@ -66,6 +68,8 @@ export default function Topbar() {
       severity: "warning",
     });
   });
+  if (!user) return;
+  if (loading) return null;
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
@@ -80,7 +84,15 @@ export default function Topbar() {
           <IconButton sx={{ color: "white", display: { md: "none" } }}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" fontWeight={700}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            onClick={() => {
+              if (user) {
+                navigate("/adminDashboard");
+              }
+            }}
+          >
             Collector.Shop Backoffice
           </Typography>
         </Box>
@@ -129,7 +141,9 @@ export default function Topbar() {
             hasMore={visibleCount < notifications.length}
           />
 
-          <Avatar src="https://i.pravatar.cc/100?img=3" sx={{ ml: 1 }} />
+          <Avatar sx={{ ml: 1 }}>
+            {user.firstname?.[0]?.toUpperCase() ?? "?"}
+          </Avatar>
         </Box>
       </Toolbar>
     </AppBar>
