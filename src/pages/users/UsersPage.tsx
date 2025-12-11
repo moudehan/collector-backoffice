@@ -1,4 +1,5 @@
 import DeleteIcon from "@mui/icons-material/Delete";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -40,11 +41,28 @@ export default function UsersAdminPage() {
         rowClickable={true}
         onRowClick={(row) => navigate(`/user/${row.id}`)}
         data={users}
+        getRowStyle={(row) =>
+          row.isFraudulent ? { backgroundColor: "#fff3cd" } : {}
+        }
         columns={[
           { field: "id", label: "ID" },
           { field: "userName", label: "Username" },
           { field: "email", label: "Email" },
           { field: "role", label: "Rôle" },
+
+          {
+            field: "fraud" as keyof User,
+            label: "Fraude",
+            render: (_, row) =>
+              row.isFraudulent ? (
+                <span style={{ color: "red", fontWeight: "bold" }}>
+                  <WarningAmberIcon />
+                </span>
+              ) : (
+                <span>—</span>
+              ),
+          },
+
           {
             field: "actions" as keyof User,
             label: "Actions",
