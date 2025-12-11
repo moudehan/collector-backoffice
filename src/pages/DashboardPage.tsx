@@ -1,49 +1,13 @@
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import ChartCard from "../components/ChartCard";
-import DataTable from "../components/DataTable";
+import { useNavigate } from "react-router-dom";
 import StatCard from "../components/StatCard";
 import DashboardLayout from "../layout/DashboardLayout";
 import { getStats } from "../services/api";
-
-type UserRow = {
-  id: string;
-  firstname: string;
-  email: string;
-  avatar: string;
-  role: "ADMIN" | "USER";
-};
-
-const users: UserRow[] = [
-  {
-    id: "1",
-    firstname: "Mouhamed",
-    email: "mouhamed@gmail.com",
-    avatar: "https://i.pravatar.cc/100?img=12",
-    role: "ADMIN",
-  },
-  {
-    id: "2",
-    firstname: "Sarah",
-    email: "sarah@yahoo.com",
-    avatar: "https://i.pravatar.cc/100?img=4",
-    role: "USER",
-  },
-  {
-    id: "3",
-    firstname: "Karim",
-    email: "karim@hotmail.com",
-    avatar: "https://i.pravatar.cc/100?img=20",
-    role: "USER",
-  },
-];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -52,6 +16,7 @@ export default function DashboardPage() {
     alerts: 0,
     messages: 0,
   });
+  const navigate = useNavigate();
 
   useEffect(() => {
     getStats()
@@ -84,75 +49,44 @@ export default function DashboardPage() {
             },
           }}
         >
-          <StatCard
-            icon={<PeopleAltIcon sx={{ fontSize: 65 }} />}
-            value={stats.users}
-            label="Utilisateurs"
-          />
+          <Box onClick={() => navigate("/users")} sx={{ cursor: "pointer" }}>
+            <StatCard
+              icon={<PeopleAltIcon sx={{ fontSize: 65 }} />}
+              value={stats.users}
+              label="Utilisateurs"
+            />
+          </Box>
 
-          <StatCard
-            icon={<WarningAmberIcon sx={{ fontSize: 65, color: "#f44336" }} />}
-            value={stats.alerts}
-            label="Alertes fraude"
-          />
+          <Box
+            onClick={() => navigate("/alertfraude")}
+            sx={{ cursor: "pointer" }}
+          >
+            <StatCard
+              icon={
+                <WarningAmberIcon sx={{ fontSize: 65, color: "#f44336" }} />
+              }
+              value={stats.alerts}
+              label="Alertes fraude"
+            />
+          </Box>
 
-          <StatCard
-            icon={<InventoryIcon sx={{ fontSize: 65 }} />}
-            value={stats.articles}
-            label="Articles publiés"
-          />
+          <Box onClick={() => navigate("/articles")} sx={{ cursor: "pointer" }}>
+            <StatCard
+              icon={<InventoryIcon sx={{ fontSize: 65 }} />}
+              value={stats.articles}
+              label="Articles publiés"
+            />
+          </Box>
 
-          <StatCard
-            icon={<ChatBubbleIcon sx={{ fontSize: 65 }} />}
-            value={stats.messages}
-            label="Messages"
-          />
+          <Box onClick={() => navigate("/messages")} sx={{ cursor: "pointer" }}>
+            <StatCard
+              icon={<ChatBubbleIcon sx={{ fontSize: 65 }} />}
+              value={stats.messages}
+              label="Messages"
+            />
+          </Box>
         </Box>
-        <DataTable
-          title="👤 Utilisateurs"
-          data={users}
-          columns={[
-            { label: "Nom", field: "firstname", width: "2fr" },
-            { label: "Email", field: "email" },
-            {
-              label: "Avatar",
-              field: "avatar",
-              // render: (v, row) => <Avatar src={v} alt={row.firstname} />,
-            },
-            {
-              label: "Role",
-              field: "role",
-              render: (role) => (
-                <Chip
-                  label={role?.toString()}
-                  color={role === "ADMIN" ? "error" : "primary"}
-                />
-              ),
-            },
-            {
-              label: "Actions",
-              field: "id",
-              render: (_, row) => (
-                <Box display="flex" gap={1}>
-                  <DeleteIcon
-                    sx={{ color: "red", cursor: "pointer" }}
-                    onClick={() => alert("Supprimer → " + row.id)}
-                  />
-                  <EditIcon
-                    sx={{ color: "#1976d2", cursor: "pointer" }}
-                    onClick={() => alert("Modifier → " + row.id)}
-                  />
-                  <VisibilityIcon
-                    sx={{ cursor: "pointer", color: "#333" }}
-                    onClick={() => alert("Voir → " + row.id)}
-                  />
-                </Box>
-              ),
-            },
-          ]}
-        />
       </Box>
-      <ChartCard />
     </DashboardLayout>
   );
 }

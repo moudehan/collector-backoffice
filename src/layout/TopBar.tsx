@@ -38,37 +38,54 @@ export default function Topbar() {
       const data: FraudAlert[] = await getFraudAlerts();
 
       setNotifications(
-        data.map((alert) => ({
-          id: alert.id.toString(),
-          title: `${alert.article.title}`,
-          subtitle: `${alert.reason} (${alert.diff_percent}%)`,
-          is_read: alert.is_read,
-          article_id: alert.article.id,
-        }))
+        data.map((alert) => {
+          const isUserAlert = alert.reason
+            .toLowerCase()
+            .includes("l'utilisateur");
+
+          return {
+            id: alert.id.toString(),
+            title: isUserAlert
+              ? "Utilisateur potentiellement frauduleux"
+              : `${alert.article.title}`,
+            subtitle: `${alert.reason} (${alert.diff_percent}%)`,
+            is_read: alert.is_read,
+            article_id: alert.article.id,
+            user_id: alert.user_id ?? null,
+            isUserAlert,
+          };
+        })
       );
     })();
   }, []);
 
   useFraudAlerts((alert: FraudAlert) => {
+    const isUserAlert = alert.reason.toLowerCase().includes("l'utilisateur");
+
     setNotifications((prev) => [
       {
         id: alert.id.toString(),
-        title: `Nouvelle anomalie : ${alert.article.title}`,
+        title: isUserAlert
+          ? "Utilisateur potentiellement frauduleux"
+          : `Nouvelle anomalie : ${alert.article.title}`,
         subtitle: `${alert.reason} (${alert.diff_percent}%)`,
         is_read: false,
         article_id: alert.article.id,
+        user_id: alert.user_id ?? null,
+        isUserAlert,
       },
       ...prev,
     ]);
 
     showAlertPopup({
       type: "fraud",
-      title: alert.article.title,
+      title: isUserAlert ? "Utilisateur suspect" : alert.article.title,
       message: `${alert.reason} (${alert.diff_percent}%)`,
-      severity: "warning",
+      severity: isUserAlert ? "error" : "warning",
     });
   });
-  if (!user) return;
+
+  if (!user) return null;
   if (loading) return null;
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -87,11 +104,8 @@ export default function Topbar() {
           <Typography
             variant="h6"
             fontWeight={700}
-            onClick={() => {
-              if (user) {
-                navigate("/adminDashboard");
-              }
-            }}
+            onClick={() => navigate("/adminDashboard")}
+            sx={{ cursor: "pointer" }}
           >
             Collector.Shop Backoffice
           </Typography>
@@ -99,9 +113,7 @@ export default function Topbar() {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <IconButton
-            onClick={(e) => {
-              setAnchorNotif(e.currentTarget);
-            }}
+            onClick={(e) => setAnchorNotif(e.currentTarget)}
             sx={{ color: "white" }}
           >
             <Badge badgeContent={unreadCount} color="error">
@@ -122,7 +134,11 @@ export default function Topbar() {
                   n.id === item.id ? { ...n, is_read: true } : n
                 )
               );
-              navigate("/alertfraude");
+              if (item.isUserAlert && item.user_id) {
+                return navigate(`/user/${item.user_id}`);
+              }
+
+              navigate(`/articles/${item.article_id}`);
             }}
             onMarkAllRead={async () => {
               await markAllNotificationsAsRead();

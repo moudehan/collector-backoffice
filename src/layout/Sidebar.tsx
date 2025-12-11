@@ -4,7 +4,6 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import UserIcon from "@mui/icons-material/People";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import {
-  Avatar,
   Box,
   Divider,
   List,
@@ -47,7 +46,6 @@ export default function Sidebar() {
       }}
     >
       <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
-        <Avatar>{user.firstname?.[0]?.toUpperCase() ?? "?"}</Avatar>
         <Box>
           <Typography fontWeight={600}>
             {user.firstname} {user.lastname}
