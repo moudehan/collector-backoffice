@@ -21,6 +21,8 @@ export interface Article {
   shop: Shop;
   likesCount: number;
   price_history: PriceHistoryItem[];
+  alerts: FraudAlert[];
+  images: [{ id: string; url: string }];
   seller: {
     id: string;
     firstname: string;

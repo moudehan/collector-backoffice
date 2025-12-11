@@ -5,6 +5,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import {
   Alert,
   Box,
@@ -13,6 +15,8 @@ import {
   CardContent,
   CircularProgress,
   Divider,
+  IconButton,
+  Modal,
   Stack,
   Typography,
 } from "@mui/material";
@@ -25,7 +29,9 @@ import PriceHistoryChart from "../../components/PriceHistoryChart";
 import DashboardLayout from "../../layout/DashboardLayout";
 
 import { deleteArticle, getArticleById } from "../../services/articles.api";
+import { API_URL } from "../../services/user.api";
 import type { Article } from "../../types/articles.type";
+import type { FraudAlert } from "../../types/fraud.type";
 
 export default function ArticleDetailPage() {
   const { id } = useParams();
@@ -34,10 +40,16 @@ export default function ArticleDetailPage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [openViewer, setOpenViewer] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   useEffect(() => {
     (async () => {
       const data = await getArticleById(id!);
+      data.fraud_alerts = data.fraud_alerts.filter(
+        (a: FraudAlert) => !a.reason.toLowerCase().includes("l'utilisateur")
+      );
+
       setArticle(data);
     })();
   }, [id]);
@@ -65,6 +77,20 @@ export default function ArticleDetailPage() {
   }
 
   const alertCount = article.fraud_alerts?.length ?? 0;
+
+  const mainRawUrl = article.images?.[0]?.url;
+  const mainImageUrl = mainRawUrl
+    ? mainRawUrl.startsWith("http")
+      ? mainRawUrl
+      : `${API_URL}${mainRawUrl}`
+    : "/placeholder.png";
+
+  const viewerRawUrl = article.images?.[viewerIndex]?.url;
+  const viewerImageUrl = viewerRawUrl
+    ? viewerRawUrl.startsWith("http")
+      ? viewerRawUrl
+      : `${API_URL}${viewerRawUrl}`
+    : "/placeholder.png";
 
   const handleConfirmDelete = async () => {
     try {
@@ -96,13 +122,23 @@ export default function ArticleDetailPage() {
                 overflow: "hidden",
                 bgcolor: "#f1f1f1",
                 boxShadow: "0 4px 15px rgba(0,0,0,0.1)",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                if (!article.images) return;
+                setViewerIndex(0);
+                setOpenViewer(true);
               }}
             >
-              <img
-                alt={article.title}
-                width="100%"
-                height="100%"
-                style={{ objectFit: "cover" }}
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  backgroundImage: `url("${mainImageUrl}")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
               />
             </Box>
 
@@ -204,24 +240,28 @@ export default function ArticleDetailPage() {
               <Typography color="text.secondary">
                 {article.shop.description}
               </Typography>
-
-              <Box mt={2}>
-                <Typography fontWeight={600} mb={0.5}>
-                  👤 Propriétaire :
-                </Typography>
-                <Typography>Email : {article.shop.owner.email}</Typography>
-                <Typography>
-                  Création :{" "}
-                  {new Date(article.shop.owner.created_at).toLocaleString()}
-                </Typography>
-              </Box>
             </Box>
 
             <Box>
               <Typography variant="subtitle1" fontWeight={700}>
                 Vendeur
               </Typography>
-              <Typography>Email : {article.seller.email}</Typography>
+              <Typography
+                sx={{
+                  textDecoration: "underline",
+                  color: "#1976d2",
+                  cursor: "pointer",
+                  "&:hover": { color: "#0d47a1" },
+                }}
+                onClick={() => navigate(`/user/${article.shop.owner.id}`)}
+              >
+                Email : {article.shop.owner.email}
+              </Typography>
+
+              <Typography>
+                Création :{" "}
+                {new Date(article.shop.owner.created_at).toLocaleString()}
+              </Typography>
             </Box>
           </Box>
 
@@ -245,7 +285,7 @@ export default function ArticleDetailPage() {
             </Typography>
           )}
 
-          {alertCount >= 5 && (
+          {alertCount >= 1 && (
             <Box mt={3}>
               <Alert severity="error" sx={{ fontSize: 15, mb: 2 }}>
                 Cet article a atteint <b>{alertCount}</b> alertes de fraude. Il
@@ -272,6 +312,83 @@ export default function ArticleDetailPage() {
           <PriceHistoryChart history={article.price_history} />
         </CardContent>
       </Card>
+      <Modal open={openViewer} onClose={() => setOpenViewer(false)}>
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            bgcolor: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: 20,
+              right: 20,
+              bgcolor: "white",
+              "&:hover": { bgcolor: "#eee" },
+            }}
+            onClick={() => setOpenViewer(false)}
+          >
+            ✖
+          </IconButton>
+
+          <Box
+            sx={{
+              width: "80%",
+              maxWidth: 800,
+              height: "80%",
+              maxHeight: 600,
+              backgroundImage: `url("${viewerImageUrl}")`,
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              borderRadius: 2,
+            }}
+          />
+
+          <IconButton
+            sx={{
+              position: "absolute",
+              left: 30,
+              bgcolor: "white",
+            }}
+            onClick={() =>
+              setViewerIndex((i) =>
+                !article.images
+                  ? 0
+                  : i === 0
+                  ? article.images.length - 1
+                  : i - 1
+              )
+            }
+          >
+            <ArrowBackIosNewIcon />
+          </IconButton>
+
+          <IconButton
+            sx={{
+              position: "absolute",
+              right: 30,
+              bgcolor: "white",
+            }}
+            onClick={() =>
+              setViewerIndex((i) =>
+                !article.images
+                  ? 0
+                  : i === article.images.length - 1
+                  ? 0
+                  : i + 1
+              )
+            }
+          >
+            <ArrowForwardIosIcon />
+          </IconButton>
+        </Box>
+      </Modal>
 
       <ModalDeleteConfirm
         open={openDeleteModal}

@@ -11,4 +11,5 @@ export interface FraudAlert {
   diff_percent: number;
   is_read: boolean;
   created_at: string;
+  user_id: string;
 }
