@@ -56,7 +56,7 @@ export async function getMe() {
     throw new Error("Utilisateur non authentifié");
   }
 
-  const res = await fetch(`${API_URL}/users/me`, {
+  const res = await fetch(`${API_URL}/auth/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

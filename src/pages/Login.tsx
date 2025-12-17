@@ -1,29 +1,13 @@
-import { Box, Paper, TextField, Typography } from "@mui/material";
-import { useState } from "react";
-
-import { useNavigate } from "react-router-dom";
+import { Box, Paper, Typography } from "@mui/material";
+import keycloakAdmin from "../../keycloak";
 import AnimatedButton from "../components/Button";
-import { useAuth } from "../contexte/UseAuth";
-import { loginAdmin } from "../services/authapi";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const { refreshUser } = useAuth();
-
   async function handleLogin() {
-    console.log("Handle login called");
-    try {
-      setError("");
-      const data = await loginAdmin(email, password);
-      localStorage.setItem("TOKEN", data.access_token);
-      await refreshUser();
-      navigate("/adminDashboard");
-    } catch {
-      setError("Email ou mot de passe incorrect");
-    }
+    await keycloakAdmin.login({
+      redirectUri: window.location.origin + "/adminDashboard",
+      prompt: "login",
+    });
   }
 
   return (
@@ -54,28 +38,8 @@ export default function Login() {
           Connectez-vous à votre espace d'administration
         </Typography>
 
-        <TextField
-          label="Email"
-          fullWidth
-          sx={{ mb: 2 }}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Mot de passe"
-          type="password"
-          fullWidth
-          sx={{ mb: 1 }}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {error && (
-          <Typography color="red" fontSize={14} mb={1}>
-            {error}
-          </Typography>
-        )}
-
         <AnimatedButton
-          label="Se connecter"
+          label="Se connecter avec Keycloak"
           width="100%"
           height={50}
           onClick={handleLogin}
