@@ -43,7 +43,7 @@ jobs:
         run: npm test
 
       - name: Start frontend (E2E)
-        run: VITE_E2E=true npm run preview &
+        run: VITE_E2E=true npm run dev &
 
   
       - name: Wait for app
