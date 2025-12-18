@@ -18,6 +18,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Force npm registry
+        run: |
+           npm config set registry https://registry.npmjs.org/
+           npm config delete //registry.npmjs.org/:_authToken || true
+
       - name: Install dependencies
         run: npm ci
 
@@ -35,6 +40,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+
+      - name: Force npm registry
+        run: |
+           npm config set registry https://registry.npmjs.org/
+           npm config delete //registry.npmjs.org/:_authToken || true
 
       - name: Install dependencies
         run: npm ci
@@ -61,6 +71,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Force npm registry
+        run: |
+           npm config set registry https://registry.npmjs.org/
+           npm config delete //registry.npmjs.org/:_authToken || true
+           
       - name: Install dependencies
         run: npm ci
 
