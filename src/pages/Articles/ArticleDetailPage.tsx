@@ -29,9 +29,9 @@ import PriceHistoryChart from "../../components/PriceHistoryChart";
 import DashboardLayout from "../../layout/DashboardLayout";
 
 import { deleteArticle, getArticleById } from "../../services/articles.api";
-import { API_URL } from "../../services/user.api";
 import type { Article } from "../../types/articles.type";
 import type { FraudAlert } from "../../types/fraud.type";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ArticleDetailPage() {
   const { id } = useParams();

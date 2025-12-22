@@ -1,7 +1,7 @@
-const API = "http://localhost:4000/fraud/alerts";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function getFraudAlerts() {
-  const res = await fetch(API, {
+  const res = await fetch(`${API_URL}/fraud/alerts`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
   });
 
@@ -11,14 +11,14 @@ export async function getFraudAlerts() {
 }
 
 export async function markAllNotificationsAsRead() {
-  await fetch("http://localhost:4000/fraud/read-all", {
+  await fetch(`${API_URL}/fraud/read-all`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
   });
 }
 
 export async function markNotificationAsRead(id: string) {
-  await fetch(`http://localhost:4000/fraud/read/${id}`, {
+  await fetch(`${API_URL}/fraud/read/${id}`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${localStorage.getItem("TOKEN")}`,
@@ -27,7 +27,7 @@ export async function markNotificationAsRead(id: string) {
 }
 
 export async function markAllNotificationsAsUnread() {
-  await fetch("http://localhost:4000/fraud/unread-all", {
+  await fetch(`${API_URL}/fraud/unread-all`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
   });

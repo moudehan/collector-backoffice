@@ -1,16 +1,15 @@
 import type { Article } from "../types/articles.type";
-
-const API = "http://localhost:4000/articles";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function getArticles(): Promise<Article[]> {
-  const res = await fetch(API, {
+  const res = await fetch(API_URL, {
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
   });
   return res.json();
 }
 
 export async function approveArticle(id: string) {
-  const res = await fetch(`http://localhost:4000/articles/${id}/approve`, {
+  const res = await fetch(`${API_URL}/articles/${id}/approve`, {
     method: "PATCH",
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
   });
@@ -19,7 +18,7 @@ export async function approveArticle(id: string) {
 }
 
 export async function getArticleById(id: string) {
-  const res = await fetch(`http://localhost:4000/articles/${id}`, {
+  const res = await fetch(`${API_URL}/articles/${id}`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },
   });
 
@@ -29,7 +28,7 @@ export async function getArticleById(id: string) {
 }
 
 export async function deleteArticle(id: string) {
-  const res = await fetch(`http://localhost:4000/articles/${id}`, {
+  const res = await fetch(`${API_URL}/articles/${id}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

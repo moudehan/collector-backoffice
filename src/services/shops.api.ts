@@ -1,6 +1,7 @@
 import type { Shop } from "../types/shop.type";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const API = "http://localhost:4000/shops/admin/all";
+const API = `${API_URL}/shops/admin/all`;
 
 export async function getShops(): Promise<Shop[]> {
   const res = await fetch(API, {

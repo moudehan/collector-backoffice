@@ -1,8 +1,10 @@
+const API_URL = import.meta.env.VITE_API_URL;
+
 export async function getStats() {
   const token = localStorage.getItem("TOKEN");
   if (!token) throw new Error("Non authentifié");
 
-  const res = await fetch("http://localhost:4000/admin/stats", {
+  const res = await fetch(`${API_URL}/admin/stats`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 

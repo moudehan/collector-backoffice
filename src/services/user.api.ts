@@ -1,6 +1,6 @@
 import type { User } from "../types/user.type";
 
-export const API_URL = "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export async function getAllUsersAdmin(): Promise<User[]> {
   const token = localStorage.getItem("TOKEN");

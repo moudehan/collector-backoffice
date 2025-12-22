@@ -1,13 +1,14 @@
 import type { Category, CategoryInput } from "../types/categories.type";
+const API_URL = import.meta.env.VITE_API_URL;
 
-const API_URL = "http://localhost:4000/admin/categories";
+const API = `${API_URL}/admin/categories`;
 
 function getToken() {
   return localStorage.getItem("TOKEN");
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const res = await fetch(API_URL, {
+  const res = await fetch(API, {
     headers: { Authorization: `Bearer ${getToken()}` },
   });
 
@@ -16,7 +17,7 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function createCategory(input: CategoryInput): Promise<Category> {
-  const res = await fetch(API_URL, {
+  const res = await fetch(API, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -33,7 +34,7 @@ export async function updateCategory(
   id: string,
   input: CategoryInput
 ): Promise<Category> {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${API}/${id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +48,7 @@ export async function updateCategory(
 }
 
 export async function deleteCategory(id: string): Promise<void> {
-  const res = await fetch(`${API_URL}/${id}`, {
+  const res = await fetch(`${API}/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${getToken()}` },
   });
