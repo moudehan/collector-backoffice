@@ -2,11 +2,11 @@ import { useEffect } from "react";
 import { io } from "socket.io-client";
 import type { FraudAlert } from "../types/fraud.type";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const VITE_SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
 export function useFraudAlerts(onAlert: (alert: FraudAlert) => void) {
   useEffect(() => {
-    const socket = io(API_URL, {
+    const socket = io(VITE_SOCKET_URL, {
       transports: ["websocket"],
       auth: {
         token: localStorage.getItem("TOKEN"),
