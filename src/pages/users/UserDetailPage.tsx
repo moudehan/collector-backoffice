@@ -150,13 +150,13 @@ export default function UserDetailPage() {
 
               <Box mt={1}>
                 <ShieldIcon
-                  sx={{ color: user.role === "admin" ? "red" : "green" }}
+                  sx={{ color: user.role === "ADMIN" ? "red" : "green" }}
                 />
                 <Typography
                   component="span"
                   ml={1}
                   fontWeight={700}
-                  color={user.role === "admin" ? "error.main" : "success.main"}
+                  color={user.role === "ADMIN" ? "error.main" : "success.main"}
                 >
                   {user.role.toUpperCase()}
                 </Typography>

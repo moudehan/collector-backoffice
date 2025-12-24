@@ -5,7 +5,7 @@ export interface User {
   userName: string;
   firstname: string;
   lastname: string;
-  role: "admin" | "user";
+  role: "ADMIN" | "USER";
   created_at: string;
 
   stats: {

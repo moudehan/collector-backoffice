@@ -23,7 +23,7 @@ export default function App() {
             <Route
               path="/adminDashboard"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <DashboardPage />
                 </ProtectedRoute>
               }
@@ -32,7 +32,7 @@ export default function App() {
             <Route
               path="/users"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <UsersAdminPage />
                 </ProtectedRoute>
               }
@@ -41,7 +41,7 @@ export default function App() {
             <Route
               path="/categories"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <CategoriesPage />
                 </ProtectedRoute>
               }
@@ -50,7 +50,7 @@ export default function App() {
             <Route
               path="/articles"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <ArticlesPage />
                 </ProtectedRoute>
               }
@@ -59,7 +59,7 @@ export default function App() {
             <Route
               path="/alertfraude"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <FraudAlertsPage />
                 </ProtectedRoute>
               }
@@ -68,7 +68,7 @@ export default function App() {
             <Route
               path="/user/:id"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <UserDetailPage />
                 </ProtectedRoute>
               }
@@ -76,7 +76,7 @@ export default function App() {
             <Route
               path="/articles/:id"
               element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ADMIN"]}>
                   <ArticleDetailPage />
                 </ProtectedRoute>
               }

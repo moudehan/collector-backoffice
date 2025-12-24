@@ -1,6 +1,8 @@
+import type { AdminStatsDto } from "../types/admin-stats.type";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
-export async function getStats() {
+export async function getStats(): Promise<AdminStatsDto> {
   const token = localStorage.getItem("TOKEN");
   if (!token) throw new Error("Non authentifié");
 
@@ -10,5 +12,5 @@ export async function getStats() {
 
   if (!res.ok) throw new Error("Impossible de récupérer les statistiques");
 
-  return res.json();
+  return res.json() as Promise<AdminStatsDto>;
 }
