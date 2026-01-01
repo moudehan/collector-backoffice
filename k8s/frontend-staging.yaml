@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: staging
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: staging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          # Comme ton backend (image locale dans kind / CI)
+          image: collector-frontend:ci
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+
+          # Probes (comme backend, mais HTTP)
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          # Si tu veux exposer une API URL au runtime :
+          # (attention : Vite remplace au build, donc ça ne changera rien
+          # sauf si tu utilises une stratégie runtime via window.__ENV__)
+          env:
+            - name: VITE_API_URL
+              value: "http://api:4000"
+            - name: VITE_KEYCLOAK_URL
+              value: "http://dummy"
+            - name: VITE_KEYCLOAK_REALM
+              value: "collector"
+            - name: VITE_KEYCLOAK_CLIENT_ID
+              value: "collector-frontend"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: staging
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
