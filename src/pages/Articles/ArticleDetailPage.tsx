@@ -4,6 +4,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -21,14 +22,20 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import ModalDeleteConfirm from "../../components/ModalDeleteConfirm";
 import PriceHistoryChart from "../../components/PriceHistoryChart";
 import DashboardLayout from "../../layout/DashboardLayout";
 
-import { deleteArticle, getArticleById } from "../../services/articles.api";
+import {
+  approveArticle,
+  rejectArticle,
+  deleteArticle,
+  getArticleById,
+} from "../../services/articles.api";
+
 import type { Article } from "../../types/articles.type";
 import type { FraudAlert } from "../../types/fraud.type";
 const API_URL = import.meta.env.VITE_API_URL;
@@ -43,16 +50,58 @@ export default function ArticleDetailPage() {
   const [openViewer, setOpenViewer] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
 
-  useEffect(() => {
-    (async () => {
-      const data = await getArticleById(id!);
-      data.fraud_alerts = data.fraud_alerts.filter(
-        (a: FraudAlert) => !a.reason.toLowerCase().includes("l'utilisateur")
-      );
+  const [decisionLoading, setDecisionLoading] = useState(false);
+  const [decisionError, setDecisionError] = useState<string | null>(null);
 
-      setArticle(data);
-    })();
+  const loadArticle = async () => {
+    const data = await getArticleById(id!);
+    data.fraud_alerts = data.fraud_alerts.filter(
+      (a: FraudAlert) => !a.reason.toLowerCase().includes("l'utilisateur")
+    );
+
+    setArticle(data);
+  };
+
+  useEffect(() => {
+    loadArticle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  const status = useMemo(
+    () => String(article?.status ?? "").toUpperCase(),
+    [article?.status]
+  );
+
+  const isPending = status === "PENDING";
+  const isRejected = status === "REJECTED";
+
+  const statusLabel = isPending
+    ? "En attente"
+    : isRejected
+    ? "Rejeté"
+    : "Approuvé";
+
+  const statusBg = isPending
+    ? "warning.light"
+    : isRejected
+    ? "error.light"
+    : "success.light";
+
+  const statusColor = isPending
+    ? "warning.dark"
+    : isRejected
+    ? "error.dark"
+    : "success.dark";
+
+  const moderationReasons = useMemo(() => {
+    const arr = article?.moderation_reasons;
+    return Array.isArray(arr) ? (arr as string[]) : [];
+  }, [article]);
+
+  const rejectionReason = useMemo(() => {
+    const r = article?.rejection_reason;
+    return typeof r === "string" ? r : "";
+  }, [article]);
 
   if (!article) {
     return (
@@ -92,16 +141,69 @@ export default function ArticleDetailPage() {
       : `${API_URL}${viewerRawUrl}`
     : "/placeholder.png";
 
+  const handleApprove = async () => {
+    try {
+      setDecisionError(null);
+      setDecisionLoading(true);
+
+      const updated = await approveArticle(article.id);
+
+      if (updated && updated.status) {
+        setArticle((prev) =>
+          prev ? { ...prev, status: updated.status } : prev
+        );
+      } else {
+        await loadArticle();
+      }
+    } catch (err) {
+      setDecisionError((err as string) ?? "Erreur lors de l’approbation.");
+    } finally {
+      setDecisionLoading(false);
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      setDecisionError(null);
+      setDecisionLoading(true);
+
+      const computedReason =
+        moderationReasons.length > 0
+          ? `Article non conforme : ${moderationReasons.join(" | ")}`
+          : "Article rejeté : non conforme aux règles de la plateforme.";
+
+      const updated = await rejectArticle(article.id, computedReason);
+
+      if (updated && updated.status) {
+        setArticle((prev) =>
+          prev
+            ? {
+                ...prev,
+                status: updated.status,
+                ...(updated.rejection_reason
+                  ? { rejection_reason: updated.rejection_reason }
+                  : { rejection_reason: computedReason }),
+              }
+            : prev
+        );
+      } else {
+        await loadArticle();
+      }
+    } catch (err) {
+      setDecisionError((err as string) ?? "Erreur lors du rejet.");
+    } finally {
+      setDecisionLoading(false);
+    }
+  };
+
   const handleConfirmDelete = async () => {
     try {
       setDeleteError(null);
       setOpenDeleteModal(false);
       await deleteArticle(article.id);
       navigate("/articles");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.log(err);
-      setDeleteError(err.message);
+    } catch (err) {
+      setDeleteError((err as string) ?? "Erreur lors de la suppression.");
     }
   };
 
@@ -153,6 +255,35 @@ export default function ArticleDetailPage() {
 
               <Divider sx={{ my: 2 }} />
 
+              {isPending && moderationReasons.length > 0 && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <b>Validation manuelle requise :</b>
+                  <ul style={{ marginTop: 8, marginBottom: 0 }}>
+                    {moderationReasons.map((r, idx) => (
+                      <li key={idx}>{r}</li>
+                    ))}
+                  </ul>
+                </Alert>
+              )}
+
+              {isRejected && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  <b>Article rejeté.</b>
+                  <br />
+                  {rejectionReason ? (
+                    <>Raison : {rejectionReason}</>
+                  ) : (
+                    <>Raison non renseignée.</>
+                  )}
+                </Alert>
+              )}
+
+              {decisionError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {decisionError}
+                </Alert>
+              )}
+
               <Box
                 sx={{
                   display: "grid",
@@ -180,30 +311,27 @@ export default function ArticleDetailPage() {
                 </Stack>
 
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  {article.status === "pending" ? (
+                  {isPending ? (
                     <PendingIcon sx={{ color: "#DAA520" }} />
+                  ) : isRejected ? (
+                    <CancelIcon color="error" />
                   ) : (
                     <CheckCircleIcon color="success" />
                   )}
 
                   <Typography fontWeight={600}>Statut :</Typography>
+
                   <Typography
                     sx={{
                       px: 1.5,
                       py: 0.5,
                       borderRadius: 1,
-                      bgcolor:
-                        article.status === "pending"
-                          ? "warning.light"
-                          : "success.light",
-                      color:
-                        article.status === "pending"
-                          ? "warning.dark"
-                          : "success.dark",
+                      bgcolor: statusBg,
+                      color: statusColor,
                       fontWeight: 700,
                     }}
                   >
-                    {article.status === "pending" ? "En attente" : "Approuvé"}
+                    {statusLabel}
                   </Typography>
                 </Stack>
 
@@ -218,52 +346,41 @@ export default function ArticleDetailPage() {
 
           <Divider sx={{ my: 4 }} />
 
-          <Typography variant="h5" fontWeight={700} mb={2}>
-            Informations boutique & vendeur
-          </Typography>
+          {isPending && (
+            <>
+              <Typography variant="h5" fontWeight={700} mb={2}>
+                Validation de l’article
+              </Typography>
 
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: 3,
-              mb: 3,
-            }}
-          >
-            <Box>
-              <Typography variant="subtitle1" fontWeight={700}>
-                Boutique
-              </Typography>
-              <Typography fontSize={15} fontWeight={600}>
-                {article.shop.name}
-              </Typography>
-              <Typography color="text.secondary">
-                {article.shop.description}
-              </Typography>
-            </Box>
-
-            <Box>
-              <Typography variant="subtitle1" fontWeight={700}>
-                Vendeur
-              </Typography>
-              <Typography
-                sx={{
-                  textDecoration: "underline",
-                  color: "#1976d2",
-                  cursor: "pointer",
-                  "&:hover": { color: "#0d47a1" },
-                }}
-                onClick={() => navigate(`/user/${article.shop.owner.id}`)}
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                alignItems={{ xs: "stretch", sm: "center" }}
               >
-                Email : {article.shop.owner.email}
-              </Typography>
+                <Button
+                  variant="contained"
+                  color="success"
+                  size="large"
+                  startIcon={<CheckCircleIcon />}
+                  disabled={decisionLoading}
+                  onClick={handleApprove}
+                >
+                  Approuver
+                </Button>
 
-              <Typography>
-                Création :{" "}
-                {new Date(article.shop.owner.created_at).toLocaleString()}
-              </Typography>
-            </Box>
-          </Box>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="large"
+                  startIcon={<CancelIcon />}
+                  disabled={decisionLoading}
+                  onClick={handleReject}
+                >
+                  Rejeter
+                </Button>
+              </Stack>
+            </>
+          )}
 
           <Divider sx={{ my: 4 }} />
 
@@ -351,11 +468,7 @@ export default function ArticleDetailPage() {
           />
 
           <IconButton
-            sx={{
-              position: "absolute",
-              left: 30,
-              bgcolor: "white",
-            }}
+            sx={{ position: "absolute", left: 30, bgcolor: "white" }}
             onClick={() =>
               setViewerIndex((i) =>
                 !article.images
@@ -370,11 +483,7 @@ export default function ArticleDetailPage() {
           </IconButton>
 
           <IconButton
-            sx={{
-              position: "absolute",
-              right: 30,
-              bgcolor: "white",
-            }}
+            sx={{ position: "absolute", right: 30, bgcolor: "white" }}
             onClick={() =>
               setViewerIndex((i) =>
                 !article.images

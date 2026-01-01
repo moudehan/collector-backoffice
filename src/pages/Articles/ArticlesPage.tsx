@@ -1,11 +1,9 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import {
   Box,
   Card,
   CardContent,
   Chip,
-  IconButton,
   Pagination,
   Typography,
 } from "@mui/material";
@@ -14,7 +12,6 @@ import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable";
 import DashboardLayout from "../../layout/DashboardLayout";
 
-import { approveArticle } from "../../services/articles.api";
 import { getShops } from "../../services/shops.api";
 
 import { useNavigate } from "react-router-dom";
@@ -39,14 +36,6 @@ export default function ArticlesPage() {
   const handleSelectShop = (shop: Shop) => {
     setSelectedShop(shop);
     setArticles(shop.articles || []);
-  };
-
-  const handleApprove = async (articleId: string) => {
-    await approveArticle(articleId);
-
-    setArticles((prev) =>
-      prev.map((a) => (a.id === articleId ? { ...a, status: "approved" } : a))
-    );
   };
 
   const startIndex = (page - 1) * shopsPerPage;
@@ -143,33 +132,42 @@ export default function ArticlesPage() {
             {
               field: "status",
               label: "Statut",
-              render: (_, row) => (
-                <Chip
-                  label={row.status}
-                  sx={{
-                    background:
-                      row.status === "pending" ? "#FFF3CD" : "#D4EDDA",
-                    color: row.status === "pending" ? "#856404" : "#155724",
-                    fontWeight: 600,
-                    borderRadius: "6px",
-                  }}
-                />
-              ),
-            },
-            {
-              field: "" as keyof Article,
-              label: "Actions",
-              render: (_, row) =>
-                row.status === "pending" ? (
-                  <IconButton
-                    color="success"
-                    onClick={() => handleApprove(row.id)}
-                  >
-                    <CheckCircleIcon />
-                  </IconButton>
-                ) : (
-                  <span style={{ opacity: 0.4 }}>—</span>
-                ),
+              render: (_, row) => {
+                const s = String(row.status ?? "").toUpperCase();
+
+                const label =
+                  s === "PENDING"
+                    ? "En attente"
+                    : s === "REJECTED"
+                    ? "Rejeté"
+                    : "Approuvé";
+
+                const bg =
+                  s === "PENDING"
+                    ? "#FFF3CD"
+                    : s === "REJECTED"
+                    ? "#F8D7DA"
+                    : "#D4EDDA";
+
+                const color =
+                  s === "PENDING"
+                    ? "#856404"
+                    : s === "REJECTED"
+                    ? "#721C24"
+                    : "#155724";
+
+                return (
+                  <Chip
+                    label={label}
+                    sx={{
+                      background: bg,
+                      color,
+                      fontWeight: 600,
+                      borderRadius: "6px",
+                    }}
+                  />
+                );
+              },
             },
           ]}
           rowClickable={true}

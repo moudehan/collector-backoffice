@@ -17,6 +17,20 @@ export async function approveArticle(id: string) {
   return res.json();
 }
 
+export async function rejectArticle(id: string, reason: string) {
+  const res = await fetch(`${API_URL}/articles/${id}/reject`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("TOKEN")}`,
+    },
+    body: JSON.stringify({ reason }),
+  });
+
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
 export async function getArticleById(id: string) {
   const res = await fetch(`${API_URL}/articles/${id}`, {
     headers: { Authorization: `Bearer ${localStorage.getItem("TOKEN")}` },

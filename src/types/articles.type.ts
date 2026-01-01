@@ -29,6 +29,9 @@ export interface Article {
     lastname: string;
     email: string;
   };
+  moderation_reasons?: string[] | null;
+  rejection_reason?: string | null;
+  rejected_at?: string | null;
 }
 
 export type PriceHistoryItem = {
