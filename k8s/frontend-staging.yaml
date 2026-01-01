@@ -20,13 +20,11 @@ spec:
     spec:
       containers:
         - name: frontend
-          # Comme ton backend (image locale dans kind / CI)
           image: collector-frontend:ci
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
 
-          # Probes (comme backend, mais HTTP)
           readinessProbe:
             httpGet:
               path: /healthz
@@ -41,10 +39,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
 
-          # Si tu veux exposer une API URL au runtime :
-          # (attention : Vite remplace au build, donc ça ne changera rien
-          # sauf si tu utilises une stratégie runtime via window.__ENV__)
-          env:
+            env:
             - name: VITE_API_URL
               value: "http://api:4000"
             - name: VITE_KEYCLOAK_URL

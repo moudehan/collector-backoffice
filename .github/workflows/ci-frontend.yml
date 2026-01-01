@@ -186,7 +186,7 @@ jobs:
   deploy_staging_https:
     name: Deploy staging (HTTPS test) - Frontend
     runs-on: ubuntu-latest
-    needs: docker_image
+    needs: deploy_staging_kind
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     env:
       K8S_NAMESPACE: staging
