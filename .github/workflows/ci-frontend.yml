@@ -66,22 +66,14 @@ jobs:
 
       - name: Audit deps (SCA)
         run: npm audit --audit-level=high || true
-
-      - name: Run tests with coverage for Sonar
+        
+      - name: Tests with coverage
         run: npm run test:cov
 
-      # - name: SonarCloud Scan
-      #   uses: SonarSource/sonarcloud-github-action@v2
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   with:
-      #     args: >
-      #       -Dsonar.projectKey=collector-frontend
-      #       -Dsonar.organization=moudehan
-      #       -Dsonar.sources=src
-      #       -Dsonar.tests=src
-      #       -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.tsx,**/*.test.ts
-      #       -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarqube-scan-action@v7
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
